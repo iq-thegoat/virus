@@ -1,4 +1,4 @@
-import os
+import os,time
 import tkinter.filedialog as fd
 import requests
 import os.path as path
@@ -11,7 +11,7 @@ colorama.init()
 
 
 def writetofile(error:str):
-        with open("erors.txt",'a',encoding='utf-8',errors='ignore')as e:
+        with open("erors.txt",'a',encoding='utf-8')as e:
             e.write(str(error)+"\n")
 
 
@@ -30,37 +30,67 @@ class FileDialog:
 
     def uploadfile(self,filepath,ENDPOINT):
         try:
-            with open(filepath,"rb",errors="ignore") as b:
-                data = {
-                    "BYTES":b.read()
-                }
-                r = requests.post(ENDPOINT,data=data)
-                if r.status_code == 200:
-                    print(Fore.GREEN+f"[CNC]:file {filepath} Is being uploaded or uploaded")
+            if os.path.isfile(filepath):
+                try:
+                    with open(filepath,"rb") as b:
+                        r = requests.post(f"{ENDPOINT}/api/recive/payload",files={"File_param":b})
+                        if r.status_code == 200:
+                            print(Fore.GREEN+f"[CNC]:file {filepath} Is being uploaded or uploaded")
+                except Exception as e:
+                    writetofile(e)
+        except Exception as e:
+                    writetofile(e)
+
+    def manageupload(self,filepath,ENDPOINT):
+        try:    
+            if path.isdir(filepath):
+                r = input("this will upload all file and subdirs in the directory that you selected do you want to proceed [y,n]?").lower()
+                if r =='y':
+                    for file in os.listdir(filepath):
+                        floader = path.join(filepath,file)
+                        self.manageupload(floader)
+            else:
+                self.uploadfile(filepath,ENDPOINT)
+
         except Exception as e:
             writetofile(e)
 
-    def readfile(filepath):
+    def readfile(self,ENDPOINT,filepath):
         try:
             if platform.system() == "Linux":
-                 #SHOULD BE REPLACED WITH THE SOCKETS CODE
-                pprint(os.system(f"cat {filepath}"))
+                text = (os.system(f"cat {filepath}"))
             elif platform.system() == "Windows":
-                #SHOULD BE REPLACED WITH THE SOCKETS CODE
-                pprint(os.system(f"type {filepath}"))
+                text = (os.system(f"type {filepath}"))
+
+
+            data = {
+                "data":text,
+                "file_name":filepath
+                }
+            
+            r = requests.post(f"{ENDPOINT}/api/recive/text",json=data)
+            print(r.status_code)
         except Exception as e:
             writetofile(e)
 
-    def dostufftofile(self,filepath,cmd,endpoint=None):
+    def dostufftofile(self,base,filepath,cmd,endpoint=None):
         if cmd == "remove":
             self.removefile(filepath=filepath)
 
 
         elif cmd == "upload" and endpoint != None:
-            self.uploadfile(filepath=filepath,ENDPOINT=endpoint)
+            self.manageupload(filepath=filepath,ENDPOINT=endpoint)
 
         elif cmd == "read":
-            self.readfile(filepath)
+            self.readfile(endpoint,filepath)
+        elif cmd == "walk":
+            if path.isdir(filepath):
+                self.searchfiles(filepath)
+            else:
+                print("you cant walk a file it must be a dir")
+                time.sleep(2)
+                self.searchfiles(base)
+
             
 
 
@@ -88,12 +118,11 @@ class FileDialog:
                 cmd = inp.split("--")[1]
             except:
                 print("You have to add a Command")
-                if cmd != "upload":
-                    filename = inp.split("--")[0].strip(" ")
-                    floder =path.join(folder_path ,filename)
-                    dostufftofile(cmd=cmd,filepath=floder)
-            except Exception as e:
-                writetofile(e)
+            filename = inp.split("--")[0].strip(" ")
+            floder =path.join(folder_path ,filename)
+            print(f"CMD:{cmd} || filepath:{floder} || ENDPOINT:'http://127.0.0.1:8000'")
+            self.dostufftofile(base=folder_path,cmd=cmd,filepath=floder,endpoint="http://127.0.0.1:8000")
+            
         
 
         except Exception as e:
@@ -106,5 +135,5 @@ class FileDialog:
 
 
     
-
-searchfiles('/home/iq/Desktop/code/Siteophile')
+APP = FileDialog()
+APP.searchfiles('/home/iq/Desktop/code/Siteophile')
