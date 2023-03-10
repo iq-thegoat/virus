@@ -1,2 +1,23 @@
 local variable 'cmd' referenced before assignment
 FileDialog.manageupload() missing 1 required positional argument: 'ENDPOINT'
+local variable 'Userdata' referenced before assignment
+local variable 'Userdata' referenced before assignment
+local variable 'Userdata' referenced before assignment
+local variable 'Userdata' referenced before assignment
+local variable 'Userdata' referenced before assignment
+local variable 'Userdata' referenced before assignment
+local variable 'Userdata' referenced before assignment
+local variable 'Userdata' referenced before assignment
+local variable 'Userdata' referenced before assignment
+local variable 'Userdata' referenced before assignment
+local variable 'Userdata' referenced before assignment
+local variable 'Userdata' referenced before assignment
+local variable 'Userdata' referenced before assignment
+local variable 'Userdata' referenced before assignment
+local variable 'Userdata' referenced before assignment
+local variable 'Userdata' referenced before assignment
+[Errno Expecting value] Internal Server Error: 0
+[Errno Expecting value] Internal Server Error: 0
+[Errno Expecting value] Internal Server Error: 0
+[Errno Expecting value] Internal Server Error: 0
+local variable 'cmd' referenced before assignment

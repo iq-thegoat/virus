@@ -3,3 +3,6 @@
 /test/
 *.pyc
 API/__pycache__/
+API/front_end/
+/test
+test
