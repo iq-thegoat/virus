@@ -4,12 +4,14 @@ import requests
 import os.path as path
 from pprint import pprint
 import colorama 
+import subprocess
+import string
 import platform
 from tabulate import tabulate
 from colorama import Fore,Style
 colorama.init()
 
-
+ENDPOINT = 'http://127.0.0.1:8000'
 def writetofile(error:str):
         with open("erors.txt",'a',encoding='utf-8')as e:
             e.write(str(error)+"\n")
@@ -28,7 +30,7 @@ class FileDialog:
         except Exception as e:
             writetofile(e)
 
-    def uploadfile(self,filepath,ENDPOINT):
+    def uploadfile(self,filepath):
         try:
             if os.path.isfile(filepath):
                 try:
@@ -41,7 +43,7 @@ class FileDialog:
         except Exception as e:
                     writetofile(e)
 
-    def manageupload(self,filepath,ENDPOINT):
+    def manageupload(self,filepath):
         try:    
             if path.isdir(filepath):
                 r = input("this will upload all file and subdirs in the directory that you selected do you want to proceed [y,n]?").lower()
@@ -50,39 +52,44 @@ class FileDialog:
                         floader = path.join(filepath,file)
                         self.manageupload(floader)
             else:
-                self.uploadfile(filepath,ENDPOINT)
+                self.uploadfile(filepath)
 
         except Exception as e:
             writetofile(e)
 
-    def readfile(self,ENDPOINT,filepath):
+    def readfile(self,filepath):
         try:
             if platform.system() == "Linux":
-                text = (os.system(f"cat {filepath}"))
+                cmd = ['cat',filepath]
             elif platform.system() == "Windows":
-                text = (os.system(f"type {filepath}"))
+                cmd = ['type',filepath]
 
-
+            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            out, err = proc.communicate()
+            if err:
+                text =("Error occurred while executing the command")
+            else:
+                text = out.decode()
             data = {
                 "data":text,
                 "file_name":filepath
                 }
             
             r = requests.post(f"{ENDPOINT}/api/recive/text",json=data)
-            print(r.status_code)
         except Exception as e:
             writetofile(e)
 
-    def dostufftofile(self,base,filepath,cmd,endpoint=None):
+    def dostufftofile(self,base,filepath,cmd):
         if cmd == "remove":
             self.removefile(filepath=filepath)
 
 
-        elif cmd == "upload" and endpoint != None:
-            self.manageupload(filepath=filepath,ENDPOINT=endpoint)
+        elif cmd == "upload" and ENDPOINT != None:
+            self.manageupload(filepath)
 
         elif cmd == "read":
-            self.readfile(endpoint,filepath)
+            self.readfile(filepath)
+
         elif cmd == "walk":
             if path.isdir(filepath):
                 self.searchfiles(filepath)
@@ -90,6 +97,13 @@ class FileDialog:
                 print("you cant walk a file it must be a dir")
                 time.sleep(2)
                 self.searchfiles(base)
+
+        elif cmd == "back":
+            try:
+                self.searchfiles(os.path.dirname(base))
+            except Exception as e:
+                print(e)
+        
 
             
 
@@ -108,7 +122,7 @@ class FileDialog:
                     data.append([Fore.RED +file_or_folder+ Style.RESET_ALL, Fore.RED + file_type + Style.RESET_ALL])        
                 else:
                     Files[file_or_folder] = "Folder "
-                    data.append([Fore.BLUE + floder + Style.RESET_ALL, Fore.BLUE + file_type + Style.RESET_ALL])        
+                    data.append([Fore.BLUE + file_or_folder + Style.RESET_ALL, Fore.BLUE + file_type + Style.RESET_ALL])        
 
             table = tabulate(data, headers=["Name", "Type"], tablefmt="fancy_grid")
             print(table)
@@ -120,8 +134,8 @@ class FileDialog:
                 print("You have to add a Command")
             filename = inp.split("--")[0].strip(" ")
             floder =path.join(folder_path ,filename)
-            print(f"CMD:{cmd} || filepath:{floder} || ENDPOINT:'http://127.0.0.1:8000'")
-            self.dostufftofile(base=folder_path,cmd=cmd,filepath=floder,endpoint="http://127.0.0.1:8000")
+            print(f"CMD:{cmd} || filepath:{floder} || ENDPOINT:{ENDPOINT}")
+            self.dostufftofile(base=folder_path,cmd=cmd,filepath=floder)
             
         
 
@@ -133,7 +147,13 @@ class FileDialog:
 
 
 
-
-    
 APP = FileDialog()
-APP.searchfiles('/home/iq/Desktop/code/Siteophile')
+    
+while True:
+    if platform.system == "Linux":
+        try:
+            APP.searchfiles('/')
+        except Exception as e:
+            writetofile(e)
+    else:
+        APP.searchfiles(os.path.expanduser("~"))

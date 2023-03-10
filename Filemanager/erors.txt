@@ -1,0 +1,2 @@
+local variable 'cmd' referenced before assignment
+FileDialog.manageupload() missing 1 required positional argument: 'ENDPOINT'

@@ -1,2 +1,5 @@
-data.txt
-Filemanager/erors.txt
+/data.txt
+/erors.txt
+/test/
+*.pyc
+API/__pycache__/
