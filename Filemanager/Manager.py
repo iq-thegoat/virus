@@ -85,6 +85,14 @@ class FileDialog:
         except Exception as e:
             writetofile(e)
 
+    def removemanager(self,filepath):
+        if os.path.isfile(filepath):
+            self.removefile(filepath)
+        else:
+            for file in os.listdir(filepath):
+                        floader = path.join(filepath,file)
+                        self.removemanager(floader)
+
     def uploadfile(self,filepath):
         try:
             if os.path.isfile(filepath):

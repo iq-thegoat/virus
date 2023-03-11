@@ -1,0 +1,12 @@
+X get_image failed: error 8 (73, 0, 1180)
+X get_image failed: error 8 (73, 0, 1180)
+X get_image failed: error 8 (73, 0, 1180)
+X get_image failed: error 8 (73, 0, 1180)
+"scrot" must be installed to use screenshot functions in Linux. Run: sudo apt-get install scrot
+Object of type getset_descriptor is not JSON serializable
+FileDialog.takescreenshot() takes 0 positional arguments but 1 was given
+Object of type bytes is not JSON serializable
+a bytes-like object is required, not 'dict'
+cannot identify image file <_io.BytesIO object at 0x7f609f400e50>
+module 'PIL' has no attribute 'ImageGrab'
+X get_image failed: error 8 (73, 0, 1180)
