@@ -11,12 +11,12 @@ from tabulate import tabulate
 from colorama import Fore,Style
 colorama.init()
 import socket
-from vidstream import VideoClient
+
 
 HEADER       =  2048 
 PORT         =  5050
 FORMAT       =  'utf-8'
-SERVER       =  "127.0.1.1"
+SERVER       =  ""
 ADDR         =  tuple((SERVER,PORT))
 client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 
@@ -140,12 +140,7 @@ class Main:
             print(e)
             writetofile(e)
     """
-    def startstream(self,path):
-        try:
-            cl = VideoClient(SERVER, 9999,path)
-            cl.start_stream()
-        except Exception as e:
-            writetofile(e)
+    
     def removemanager(self,filepath):
         if os.path.isfile(filepath):
             self.removefile(filepath)
@@ -173,7 +168,7 @@ class Main:
                 for file in os.listdir(filepath):
                     floader = path.join(filepath,file)
                     self.manageupload(floader)
-                send_msg("conf-- Files are flowing")
+                    send_msg(f"conf-- Files are flowing [{file}]")
             else:
                 self.uploadfile(filepath)
 
@@ -237,8 +232,6 @@ class Main:
             self.manageupload(filepath)
             self.searchfiles(os.path.dirname(filepath))
 
-        elif cmd == "play":
-            self.startstream(filepath)
 
         elif cmd == "read":
             self.readfile(filepath)
@@ -288,6 +281,7 @@ class Main:
                 else:
                     Files[file_or_folder] = "Folder "
                     data.append([Fore.BLUE + file_or_folder + Style.RESET_ALL, Fore.BLUE + file_type + Style.RESET_ALL])        
+
             send_msg(str(f"file_list--{data}"))
             print("sent message")
             inp = server_input(cmd="file_manager")
