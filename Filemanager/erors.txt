@@ -1,0 +1,8 @@
+cannot access local variable 'cmd' where it is not associated with a value
+cannot access local variable 'cmd' where it is not associated with a value
+cannot access local variable 'cmd' where it is not associated with a value
+[WinError 5] Access is denied: 'd:\\TEST'
+[WinError 5] Access is denied: 'd:\\'
+[WinError 5] Access is denied: 'd:\\TEST'
+[WinError 5] Access is denied: 'd:\\TEST'
+[WinError 5] Access is denied: 'd:\\TEST'
