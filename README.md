@@ -1,0 +1,14 @@
+# virus
+
+**FEATURES:**
+++ Filemanager
+
+++ BROWSER HISTORY STEALER (brave , chrome)
+
+++ BROWSER PASSWORD STEALER (chrome)
+
+++ FILESTEALER
+
+++ EMBEDDED COMAND SYSTEM
+
+++ OTHER FEATURES STILL UNDERWORK
